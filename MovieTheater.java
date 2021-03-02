@@ -10,7 +10,7 @@ public class MovieTheater {
     private int seats;
     private int[] center;
     private int[][] theater;
-    private int[] seatsPerRow; // Number of available seats per row.
+    private int[] seatsPerRow;
 
     public MovieTheater(int rows, int columns) {
         this.rows = rows;
@@ -175,14 +175,14 @@ public class MovieTheater {
     /**
      * Returns the distance between point (i, j) and the center.
      */
-    public double distanceFromCenter(int i, int j) {
+    private double distanceFromCenter(int i, int j) {
         return twoPointDistance(i, j, center[0], center[1]);
     }
 
     /**
      * Returns the distance between point two points
      */
-    public double twoPointDistance(int i, int j, int k, int l) {
+    private double twoPointDistance(int i, int j, int k, int l) {
         return Math.sqrt(Math.pow(i - k, 2) + Math.pow(j - l, 2));
     }
 }
