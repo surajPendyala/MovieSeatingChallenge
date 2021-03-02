@@ -1,3 +1,5 @@
+package MovieTheaterSeatingChallenge;
+
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -5,22 +7,22 @@ import java.util.ArrayList;
 public class MovieTheater {
     private int rows;
     private int columns;
-    private int availableSeats;
+    private int seats;
     private int[] center;
     private int[][] theater;
-    private int[] numSeatsRow; // Number of available seats per row.
+    private int[] seatsPerRow; // Number of available seats per row.
 
     public MovieTheater(int rows, int columns) {
-        this.rows = numRows;
-        this.columns = numColumns;
-        this.availableSeats = rows * columns;
+        this.rows = rows;
+        this.columns = columns;
+        this.seats = rows * columns;
         this.center = new int[]{rows / 2, columns / 2};
         this.theater = new int[rows][columns];
-        for (int i = 0; i < theater.length; i++) {
-            Arrays.fill(i, 1);
+        for (int[] row: theater) {
+            Arrays.fill(row, 1);
         }
-        this.numSeatsRow = new int[rows];
-        this.Arrays.fill(numSeatsRow, columns);
+        this.seatsPerRow = new int[rows];
+        Arrays.fill(seatsPerRow, columns);
     }
 
     /**
@@ -28,98 +30,89 @@ public class MovieTheater {
      * @return the processed requests
      * @param requests the list of requests
      */
-    public List<String> processRequests(List<String> requests) {
-        List<String> outputs = new ArrayList<>();
+    public List<String> takeRequests(List<String> requests) {
+        ArrayList<String> listOfRequests = new ArrayList<>();
         for(String request: requests) {
-            outputs.add(reserveSeats(request));
+            listOfRequests.add(reserveSeats(request));
         }
-        return outputs;
+        return listOfRequests;
     }
 
     /**
-     * Process a single reservation request.
-     * @return string following the output format
-     * @param reservation A single reservation request
+     * Processes a reservation request by user
      */
     private String reserveSeats(String reservation) {
         String str = null;
         String[] split = reservation.split(" ");
-        int requestSeats = Integer.parseInt(split[1]);
+        int requestedSeats = Integer.parseInt(split[1]);
 
-        if (requestSeats > availableSeats) {
-            return "Sorry, not enough seats is available for this request: " + split[0];
-        } else if (requestSeats < 1) {
-            return "For request: " + split[0] + ". Please reserve at least 1 seat";
+        if (requestedSeats > seats) {
+            return "Sorry, there are no seats left for this request " + split[0];
+        } else if (requestedSeats < 1) {
+            return "For request: " + split[0] + ". Please reserve at least one seat. Thank you!";
         } else {
             str = split[0];
         }
 
-        List<Integer[]> assignments = searchSeats(requestSeats);
-        for (Integer[] assignment: assignments) {
+        List<Integer[]> assigned = searchSeats(requestedSeats);
+        for (Integer[] assignment: assigned) {
             updateTheater(assignment[0], assignment[1], assignment[2], false);
             for (int i = 0; i < assignment[2]; i++) {
                 int j = assignment[0] + 65;
                 char c = (char)j;
-                output = output + " "  + c + (assignment[1] + 1 + i);
+                str = str + " "  + c + (assignment[1] + 1 + i);
             }
         }
 
-        return output;
+        return str;
     }
 
     /**
-     * Search for NUM number of seats. The search starts from the center row,
-     * and recursively expanding to the upper and lower rows. For example, say the
-     * theater has row A, B, C, D, and E, if we cannot find enough seats on row A, we will
-     * search B and C next, if no seats are found we go search D and E.
-     * If no consecutive seats are found, recursively split the party and search.
+     * Search for the number of seats. The search starts from the center row,
+     * and recursively expands to the other rows. 
      * The priorities of searching are the following:
      *  1. distance from the center
-     *  2. consecutiveness: sitting on the same row
-     *
-     * Output example:
-     * [0, 0, 3] means reserved 3 seats starting from A1 (i.e. reserved A1, A2, and A3).
-     * @return List of assigned seats
-     * @param num number of requested seats
+     *  2. Linearity: sitting on the same row
      */
     public List<Integer[]> searchSeats(int num) {
-        List<Integer[]> assignedSeats = new ArrayList<>();
-        int row = center[0], dist = 1;
-        boolean upper = false, lower = false;
+        List<Integer[]> seats = new ArrayList<>();
+        int row = center[0];
+        int distance = 1;
+        boolean upper = false;
+        boolean lower = false;
         while (row > -1 && row < rows) {
             int col = searchRow(row, num);
             if (col > -1) {
-                assignedSeats.add(new Integer[]{row, col, num});
+                seats.add(new Integer[]{row, col, num});
                 break;
             } else if (!lower){
                 lower = true;
-                row = center[0] - dist;
+                row = center[0] - distance;
             } else if (!upper) {
                 upper = true;
-                row = center[0] + dist;
+                row = center[0] + distance;
             } else {
-                dist++;
+                distance++;
                 upper = false; lower = false;
             }
         }
 
-        if (assignedSeats.size() == 0) {
-            assignedSeats.addAll(searchSeats(num / 2));
-            for(Integer[] a: assignedSeats) {
+        if (seats.size() == 0) {
+            seats.addAll(searchSeats(num / 2));
+            for(Integer[] a: seats) {
                 updateTheater(a[0], a[1], a[2], true);
             }
-            assignedSeats.addAll(searchSeats(num - (num / 2)));
+            seats.addAll(searchSeats(num - (num / 2)));
         }
 
-        return assignedSeats;
+        return seats;
     }
 
     /**
-     * Search a ROW for NUM of seats
-     * @return the starting column
+    Searches the row for number of seats
      */
     public int searchRow(int row, int num) {
-        if (numSeatsRow[row] < num) {
+        if (seatsPerRow[row] < num) {
             return -1;
         }
 
@@ -143,36 +136,35 @@ public class MovieTheater {
     }
 
     /**
-     * Update the available seats in the theater according to the public
-     * safety guidelines, which is a buffer of 3 seats and/or one row.
+     * Update the available seats in the theater (follows COVID-19 protocols)
      */
-    private void updateTheater(int row, int column, int num, boolean safe) {
+    public void updateTheater(int row, int col, int num, boolean safe) {
         if (safe) {
             for (int i = 0; i < num; i++) {
-                theater[row][column + i] = 0;
-                availableSeats--;
-                numSeatsRow[row]--;
+                theater[row][col + i] = 0;
+                seats--;
+                seatsPerRow[row]--;
             }
         } else {
-            for (int c = column - 3; c < column + num + 3; c++) {
+            for (int c = col - 3; c < col + num + 3; c++) {
                 if (c > -1 && c < columns && theater[row][c] == 1) {
                     theater[row][c] = 0;
-                    availableSeats--;
-                    numSeatsRow[row]--;
+                    seats--;
+                    seatsPerRow[row]--;
                 }
             }
 
-            for (int c = column - 1; c < column + num + 1; c++) {
+            for (int c = col - 1; c < col + num + 1; c++) {
                 if (c > -1 && c < columns) {
                     if (row - 1 > -1 && theater[row - 1][c] == 1) {
                         theater[row - 1][c] = 0;
-                        availableSeats--;
-                        numSeatsRow[row - 1]--;
+                        seats--;
+                        seatsPerRow[row - 1]--;
                     }
                     if (row + 1 < rows && theater[row + 1][c] == 1) {
                         theater[row + 1][c] = 0;
-                        availableSeats--;
-                        numSeatsRow[row + 1]--;
+                        seats--;
+                        seatsPerRow[row + 1]--;
                     }
                 }
             }
@@ -183,16 +175,14 @@ public class MovieTheater {
     /**
      * Returns the distance between point (i, j) and the center.
      */
-    private double distanceFromCenter(int i, int j) {
+    public double distanceFromCenter(int i, int j) {
         return twoPointDistance(i, j, center[0], center[1]);
     }
 
     /**
-     * Returns the distance between point (i, j) and point (u, v).
+     * Returns the distance between point two points
      */
-    private double twoPointDistance(int i, int j, int u, int v) {
-        return Math.sqrt(Math.pow(i - u, 2) + Math.pow(j - v, 2));
+    public double twoPointDistance(int i, int j, int k, int l) {
+        return Math.sqrt(Math.pow(i - k, 2) + Math.pow(j - l, 2));
     }
-
 }
-
