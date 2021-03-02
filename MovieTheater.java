@@ -2,10 +2,6 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
 
-/**
- * Movie Theater Class
- * @author Benjamin Cheung
- */
 public class MovieTheater {
     private int rows;
     private int columns;
@@ -46,7 +42,7 @@ public class MovieTheater {
      * @param reservation A single reservation request
      */
     private String reserveSeats(String reservation) {
-        String output = null;
+        String str = null;
         String[] split = reservation.split(" ");
         int requestSeats = Integer.parseInt(split[1]);
 
@@ -55,7 +51,7 @@ public class MovieTheater {
         } else if (requestSeats < 1) {
             return "For request: " + split[0] + ". Please reserve at least 1 seat";
         } else {
-            output = split[0];
+            str = split[0];
         }
 
         List<Integer[]> assignments = searchSeats(requestSeats);
