@@ -1,4 +1,4 @@
-# MovieSeatingChallenge
+# Movie Theater Seating Challenge
 Programming Language: Java
 
 Challenge Overview:
