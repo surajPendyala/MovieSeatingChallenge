@@ -44,8 +44,8 @@ java Main
 The program asks you to enter a complete path to the input file.Now, the program will run and store the outputs in a .output file in the same path as the input file, and it will also print the complete path of the output file. For example:
 
 Please enter the file path
-[your_directory]/input.text
-[your_directory]/input.output
+[yourdirectory].input.text
+[yourdirectory].input.output
 
 
 
