@@ -14,17 +14,17 @@ public class MovieTheater {
     private int[][] theater;
     private int[] numSeatsRow; // Number of available seats per row.
 
-    public MovieTheater(int numRows, int numColumns) {
-        rows = numRows;
-        columns = numColumns;
-        availableSeats = rows * columns;
-        center = new int[]{rows / 2, columns / 2};
-        theater = new int[rows][columns];
-        for (int[] row: theater) {
-            Arrays.fill(row, 1);
+    public MovieTheater(int rows, int columns) {
+        this.rows = numRows;
+        this.columns = numColumns;
+        this.availableSeats = rows * columns;
+        this.center = new int[]{rows / 2, columns / 2};
+        this.theater = new int[rows][columns];
+        for (int i = 0; i < theater.length; i++) {
+            Arrays.fill(i, 1);
         }
-        numSeatsRow = new int[rows];
-        Arrays.fill(numSeatsRow, columns);
+        this.numSeatsRow = new int[rows];
+        this.Arrays.fill(numSeatsRow, columns);
     }
 
     /**
